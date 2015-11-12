@@ -28,6 +28,10 @@ Makefile
 cmake_install.cmake
 install_manifest.txt
 
+# ROOT files
+
+*.root
+
 # build directory & data directory
 
 build/
