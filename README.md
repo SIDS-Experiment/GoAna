@@ -12,7 +12,7 @@ Statistical data analysis of the time modulated orbital electron capture decay e
 ### Optional
 1. download [BAT](https://www.mppmu.mpg.de/bat/) and [Cuba](http://www.feynarts.de/cuba/) framework 
 2. Follow standard cuba installation instruction
-3. Follow BAT installation instruction and set the BAT installation path prefix to the FairSoft installation path ($SIMPATH)
+3. Follow BAT installation instruction and set the BAT installation path prefix to the FairSoft installation path ($SIMPATH) or alternatively export BATPREFIX environment variable.
 
 
 ###  Install GoAna

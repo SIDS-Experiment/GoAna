@@ -9,13 +9,20 @@
 # Check the environment variable "FAIRROOTPATH"
 
 if(FairRoot_DIR)
-  SET(FAIRROOTPATH ${FairRoot_DIR})
+  set(FAIRROOTPATH ${FairRoot_DIR})
 else()
-  IF(NOT DEFINED ENV{FAIRROOTPATH})
-        MESSAGE(FATAL_ERROR "You did not define the environment variable FAIRROOTPATH which is needed to find FairRoot. Please set this variable and execute cmake again.")
-    ENDIF(NOT DEFINED ENV{FAIRROOTPATH})
- 
-    SET(FAIRROOTPATH $ENV{FAIRROOTPATH})
+  if(NOT DEFINED ENV{FAIRROOTPATH})
+    set(user_message "You did not define the environment variable FAIRROOTPATH which is needed to find FairRoot.\
+         Please set this variable and execute cmake again." )
+    if(FairRoot_FIND_REQUIRED)
+      MESSAGE(FATAL_ERROR ${user_message})
+    else(FairRoot_FIND_REQUIRED)
+      MESSAGE(WARNING ${user_message})
+      return()
+    endif(FairRoot_FIND_REQUIRED)
+  endif(NOT DEFINED ENV{FAIRROOTPATH})
+
+  set(FAIRROOTPATH $ENV{FAIRROOTPATH})
 endif()
 
 MESSAGE(STATUS "Setting FairRoot environment…")
@@ -25,7 +32,7 @@ FIND_PATH(FAIRROOT_INCLUDE_DIR NAMES FairRun.h  PATHS
   NO_DEFAULT_PATH
 )
 
-FIND_PATH(FAIRROOT_LIBRARY_DIR NAMES libBase.so PATHS
+FIND_PATH(FAIRROOT_LIBRARY_DIR NAMES libBase.so libBase.dylib PATHS
    ${FAIRROOTPATH}/lib
   NO_DEFAULT_PATH
 )
@@ -35,6 +42,18 @@ FIND_PATH(FAIRROOT_CMAKEMOD_DIR NAMES CMakeLists.txt  PATHS
   NO_DEFAULT_PATH
 )
 
+set(FAIRMQ_DEPENDENCIES
+  boost_log
+  boost_log_setup
+  boost_thread
+  boost_filesystem
+  boost_system
+  boost_date_time
+  boost_timer
+  boost_program_options
+  pthread
+  fairmq_logger
+)
 
 if(FAIRROOT_INCLUDE_DIR AND FAIRROOT_LIBRARY_DIR)
    set(FAIRROOT_FOUND TRUE)
@@ -44,7 +63,11 @@ if(FAIRROOT_INCLUDE_DIR AND FAIRROOT_LIBRARY_DIR)
    MESSAGE(STATUS "FairRoot Cmake Modules      :     ${FAIRROOT_CMAKEMOD_DIR}")
 
 else(FAIRROOT_INCLUDE_DIR AND FAIRROOT_LIBRARY_DIR)
-   set(FAIRROOT_FOUND FALSE)
-   MESSAGE(FATAL_ERROR "FairRoot installation not found")
+    set(FAIRROOT_FOUND FALSE)
+    if(FairRoot_FIND_REQUIRED)
+        MESSAGE(FATAL_ERROR "FairRoot installation not found")
+    else(FairRoot_FIND_REQUIRED)
+        MESSAGE(STATUS "FairRoot installation not found")
+    endif(FairRoot_FIND_REQUIRED)
 endif (FAIRROOT_INCLUDE_DIR AND FAIRROOT_LIBRARY_DIR)
 

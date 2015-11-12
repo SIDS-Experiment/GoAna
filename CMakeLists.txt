@@ -101,6 +101,7 @@ CHECK_EXTERNAL_PACKAGE_INSTALL_DIR()
 
 find_package(ROOT 5.32.00)
 find_package(BAT COMPONENTS models mtf mvc)
+find_package(FairRoot)
 
 If(FAIRSOFT_EXTERN)
   set(BOOST_ROOT ${SIMPATH})
