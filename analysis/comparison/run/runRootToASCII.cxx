@@ -46,7 +46,9 @@ int main(int argc, char** argv)
         formatDesc.add_options() 
             ("FormatFlag", po::value<std::string>()->default_value("decay-sorted"), "Flag for the text formatting of the ASCII output. Possible flags : \n"
                                                  "  decay-sorted \n"                                                   
-                                                 "  decay-summary");
+                                                 "  decay-summary")
+            ("decay-number", po::value<int>()->default_value(-1), "requested maximum number of decay per file. Default -1 means save all decays")
+            ;
         config->AddToCmdLineOptions(formatDesc);
         
         if (config->ParseAll(argc,argv,true))
@@ -58,6 +60,7 @@ int main(int argc, char** argv)
         std::string branchname=config->GetValue<std::string>("input.data.file.branch.name");
         std::string formatflag=config->GetValue<std::string>("FormatFlag");
         std::string outfilename=config->GetValue<std::string>("output.data.file.name");
+        int requested_decaynumber_perfile=config->GetValue<int>("decay-number");
         
         if(formatflag!="decay-sorted" && formatflag!="decay-summary")
         {
@@ -96,8 +99,16 @@ int main(int argc, char** argv)
                     for(const auto& injection : DataContainer)
                     {
                         std::vector<EsrDecayEvent> eventlist = injection.GetECData();
-                        for(const auto& event : eventlist)
-                            txtfile << event.GetDecayTime() << std::endl;
+                        if(requested_decaynumber_perfile>0)
+                        {
+                            if(eventlist.size() == requested_decaynumber_perfile)
+                                for(const auto& event : eventlist)
+                                    txtfile << event.GetDecayTime() << std::endl;
+                        }
+                        else
+                            for(const auto& event : eventlist)
+                                txtfile << event.GetDecayTime() << std::endl;
+
                     }
                 }
                 // to print more info including duplicated analysis

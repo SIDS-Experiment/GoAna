@@ -2,7 +2,7 @@
 
 
 CONVERT="runRootToASCII"
-CONVERT+=" --input.data.file.name @CMAKE_SOURCE_DIR@/workspace/input/RV2014_Pm_H_EC.root"
+CONVERT+=" --input.data.file.name @CMAKE_SOURCE_DIR@/workspace/input/RV2014_Pm_H_EC_full.root"
 CONVERT+=" --input.data.file.tree.name SIDSdecayData"
 CONVERT+=" --input.data.file.branch.name EsrInjData."
 CONVERT+=" $@"
