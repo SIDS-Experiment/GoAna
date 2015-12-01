@@ -19,6 +19,9 @@ include_directories(SYSTEM ${SYSTEM_INCLUDE_DIRECTORIES})
 If (Boost_FOUND)
   configure_file( ${CMAKE_SOURCE_DIR}/analysis/lambdas/run/scripts/FitLambdas.sh.in ${CMAKE_BINARY_DIR}/bin/FitLambdas.sh )
   EXEC_PROGRAM(/bin/chmod ARGS "u+x  ${CMAKE_BINARY_DIR}/bin/FitLambdas.sh")
+
+  configure_file( ${CMAKE_SOURCE_DIR}/analysis/lambdas/run/scripts/KolmogorovTest.sh.in ${CMAKE_BINARY_DIR}/bin/KolmogorovTest.sh )
+  EXEC_PROGRAM(/bin/chmod ARGS "u+x  ${CMAKE_BINARY_DIR}/bin/KolmogorovTest.sh")
 EndIf (Boost_FOUND)
 
 
@@ -39,6 +42,7 @@ Set(DEPENDENCIES_LIST
     go_analysis_options
     Tree
     Hist
+    Graf
     RIO
     Cint
     Core
@@ -53,10 +57,12 @@ Set(DEPENDENCIES_LIST
 If (Boost_FOUND)
     Set(Exe_Names
     runFitLambda
+    runKolmogorov
     )
 
 set(Exe_Source
     run/runFitLambda.cxx
+    run/run2SamplesKolmogorovTest.cxx
     )
 
   List(LENGTH Exe_Names _length)

@@ -23,6 +23,7 @@ public:
 protected:
    
     po::options_description fObservable_options;
+    po::options_description fFileOptions;
     int InitOptionDescription();
     
     bool fconfigfile_flag;

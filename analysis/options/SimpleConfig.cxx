@@ -10,14 +10,11 @@
 
 SimpleConfig::SimpleConfig() : SIDSProgOptions()
 {
-    InitOptionDescription();
     
-    fConfigDesc.add(fObservable_options);
     
-    fCmdLineOptions.add(fGenericDesc)
-                    .add(fConfigDesc);
     
-    fVisibleOptions.add(fCmdLineOptions);
+
+    
 }
 
 
@@ -27,14 +24,12 @@ SimpleConfig::~SimpleConfig() {
 
 int SimpleConfig::ParseAll(const int argc, char** argv, bool AllowUnregistered)
 {
-    fVisibleOptions.add(fCmdLineOptions);
+    InitOptionDescription();
     if(ParseCmdLine(argc,argv,fCmdLineOptions,fVarMap,AllowUnregistered))
         return 1;
     
     if(fUseConfigFile)
     {
-        fConfigFileOptions.add(fConfigDesc);
-        fVisibleOptions.add(fConfigFileOptions);
         if(ParseCfgFile(fConfigFile.string(),fConfigFileOptions,fVarMap,AllowUnregistered))
             return 1;
     }
@@ -50,7 +45,7 @@ int SimpleConfig::InitOptionDescription()
     ("exec", po::value<std::string>()->default_value("Hello-World"), "execute task")
     ;
     
-    fConfigDesc.add_options()
+    fFileOptions.add_options()
     //("input.file-name", po::value<std::string>(&fConfigFile)->required(), "Path to config")
     ("input.data.file.name", po::value<std::string>()->default_value("inputfile.txt"), "Path to config")
     ("input.data.name", po::value< std::string >()->default_value("mydataset"), "Name of the data set.")
@@ -76,6 +71,16 @@ int SimpleConfig::InitOptionDescription()
     ("obs.XRangeOption", po::value< std::string >()->default_value("FALSE"), "FALSE //XRangeAuto")
     ;
     
+
+    AddToCmdLineOptions(fGenericDesc);
+    AddToCmdLineOptions(fObservable_options);
+    AddToCmdLineOptions(fFileOptions);
+
+    if (fUseConfigFile)
+    {
+        AddToCfgFileOptions(fObservable_options,false);
+        AddToCfgFileOptions(fFileOptions,false);
+    }
     
     return 0;
 }
