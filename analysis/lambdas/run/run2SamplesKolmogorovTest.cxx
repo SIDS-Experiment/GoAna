@@ -16,6 +16,7 @@
 // root
 #include "TApplication.h"
 #include "TH1D.h"
+#include "TF1.h"
 #include "TCanvas.h"
 #include "TLine.h"
 #include "TLegend.h"
@@ -56,6 +57,8 @@ int main(int argc, char** argv)
         decayNbDesc.add_options() 
             ("NEC-dist1", po::value<int>()->default_value(1), "requested maximum number of decay per file for distribution 1")
             ("NEC-dist2", po::value<int>()->default_value(2), "requested maximum number of decay per file for distribution 2")
+            ("sim", po::value<bool>()->default_value(false), "sim")
+            
             ;
         config->AddToCmdLineOptions(decayNbDesc);
         
@@ -84,6 +87,7 @@ int main(int argc, char** argv)
 
     /// plot data
     std::string execute=config->GetValue<std::string>("exec");
+    bool simulation=config->GetValue<bool>("sim");
     if(execute=="plot")
     {
         double xmin=config->GetValue<double>("obs.xmin");
@@ -113,29 +117,41 @@ int main(int argc, char** argv)
         CDF2->SetStats(kFALSE);
         Distance->SetStats(kFALSE);
 
-
-
-        for(auto& file : DataContainer)
+        
+        if(simulation)
         {
-            std::vector<EsrDecayEvent> eventlist = file.GetECData();
-            if(eventlist.size() == NECDist1)
-                for(auto& event : eventlist)
-                {
-                    double t_ec=(double)event.GetDecayTime();
-                    if(t_ec>=xmin && t_ec<=xmax)
-                        Histo1->Fill(t_ec);
-                }
-
-            if(eventlist.size() == NECDist2)
-                for(auto& event : eventlist)
-                {
-                    double t_ec=(double)event.GetDecayTime();
-                    if(t_ec>=xmin && t_ec<=xmax)
-                        Histo2->Fill(t_ec);
-                }
-
+            TF1* exp1 = new TF1("exp1","expo",xmin,xmax);
+            TF1* exp2 = new TF1("exp2","expo",xmin,xmax);
+            exp1->SetParameters(1.0,-0.01);
+            exp2->SetParameters(1.0,-0.1);
+            Histo1->FillRandom("exp1",100);
+            Histo2->FillRandom("exp2",100);
 
         }
+        else
+        {
+            for(auto& file : DataContainer)
+            {
+                std::vector<EsrDecayEvent> eventlist = file.GetECData();
+                if(eventlist.size() == NECDist1)
+                    for(auto& event : eventlist)
+                    {
+                        double t_ec=(double)event.GetDecayTime();
+                        if(t_ec>=xmin && t_ec<=xmax)
+                            Histo1->Fill(t_ec);
+                    }
+
+                if(eventlist.size() == NECDist2)
+                    for(auto& event : eventlist)
+                    {
+                        double t_ec=(double)event.GetDecayTime();
+                        if(t_ec>=xmin && t_ec<=xmax)
+                            Histo2->Fill(t_ec);
+                    }
+            }
+        }
+
+
 
         double Norm1 = Histo1->GetEntries();
         double Norm2 = Histo2->GetEntries();
@@ -226,14 +242,32 @@ int main(int argc, char** argv)
         max_height=max_height+0.1*max_height;
 
 
-        std::string outputPdfFile="Kolmogorov_RV2014_";
-        outputPdfFile+=std::to_string(NECDist1);
-        outputPdfFile+="VS"+std::to_string(NECDist2);
+        std::string outputPdfFile;
+
+        if(!simulation)
+        {
+            outputPdfFile="Kolmogorov_RV2014_";
+            outputPdfFile+=std::to_string(NECDist1);
+            outputPdfFile+="VS"+std::to_string(NECDist2);
+        }
+        else
+        {
+            outputPdfFile="Kolmogorov_simulation_";
+        }
         outputPdfFile+=".pdf";
         
         std::string canvatitle="Two samples Kolmogorov test ";
-        canvatitle+=std::to_string(NECDist1);
-        canvatitle+=" EC vs "+std::to_string(NECDist2) +" EC";
+        
+
+        if(!simulation)
+        {
+            canvatitle+=std::to_string(NECDist1);
+            canvatitle+=" EC vs "+std::to_string(NECDist2) +" EC";
+        }
+        else
+        {
+            canvatitle+=" (simulation)";
+        }
         // Plot data
         TApplication app("App", nullptr, nullptr);
         TCanvas *Canvas_compare = new  TCanvas(canvatitle.c_str(),canvatitle.c_str(),1000,800);
